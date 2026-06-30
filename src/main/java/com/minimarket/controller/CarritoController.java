@@ -5,6 +5,7 @@ import com.minimarket.dto.CarritoResponseDto;
 import jakarta.validation.Valid;
 import com.minimarket.service.CarritoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/carrito")
+@PreAuthorize("hasAnyAuthority('CLIENTE', 'EMPLEADO', 'ADMINISTRADOR')")
 public class CarritoController {
 
     @Autowired

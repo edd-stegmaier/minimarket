@@ -17,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Configuration
+@EnableMethodSecurity
 @EnableConfigurationProperties(JwtProperties.class)
 public class SecurityConfig {
 
@@ -60,13 +62,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/public/**", "/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos/**", "/api/categorias/**")
-                            .hasAnyRole("CLIENTE", "EMPLEADO", "GERENTE")
+                            .hasAnyAuthority("CLIENTE", "EMPLEADO", "ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.POST, "/api/ventas/**")
+                            .hasAuthority("EMPLEADO")
                         .requestMatchers("/api/carrito/**", "/api/ventas/**")
-                            .hasAnyRole("CLIENTE", "EMPLEADO", "GERENTE")
+                            .hasAnyAuthority("CLIENTE", "EMPLEADO", "ADMINISTRADOR")
                         .requestMatchers("/api/productos/**", "/api/categorias/**", "/api/inventario/**", "/api/detalle-ventas/**")
-                            .hasAnyRole("EMPLEADO", "GERENTE")
+                            .hasAnyAuthority("EMPLEADO", "ADMINISTRADOR")
                         .requestMatchers("/api/usuarios/**")
-                            .hasRole("GERENTE")
+                            .hasAuthority("ADMINISTRADOR")
                         .anyRequest().authenticated()
                 )
                     .httpBasic(httpBasic -> httpBasic.disable())

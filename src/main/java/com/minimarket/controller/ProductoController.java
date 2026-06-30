@@ -5,6 +5,7 @@ import com.minimarket.dto.ProductoResponseDto;
 import jakarta.validation.Valid;
 import com.minimarket.service.ProductoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/productos")
+@PreAuthorize("hasAnyAuthority('CLIENTE', 'EMPLEADO', 'ADMINISTRADOR')")
 public class ProductoController {
 
     @Autowired
@@ -30,11 +32,13 @@ public class ProductoController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     public ProductoResponseDto guardarProducto(@Valid @RequestBody ProductoRequestDto producto) {
         return productoService.save(producto);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     public ResponseEntity<ProductoResponseDto> actualizarProducto(@PathVariable Long id, @Valid @RequestBody ProductoRequestDto producto) {
         Optional<ProductoResponseDto> productoExistente = productoService.findById(id);
         if (productoExistente.isPresent()) {
@@ -45,6 +49,7 @@ public class ProductoController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
         if (productoService.findById(id).isPresent()) {
             productoService.deleteById(id);

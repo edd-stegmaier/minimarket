@@ -5,6 +5,7 @@ import com.minimarket.dto.CategoriaResponseDto;
 import jakarta.validation.Valid;
 import com.minimarket.service.CategoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/categorias")
+@PreAuthorize("hasAnyAuthority('CLIENTE', 'EMPLEADO', 'ADMINISTRADOR')")
 public class CategoriaController {
 
     @Autowired
@@ -30,11 +32,13 @@ public class CategoriaController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('EMPLEADO', 'ADMINISTRADOR')")
     public CategoriaResponseDto guardarCategoria(@Valid @RequestBody CategoriaRequestDto categoria) {
         return categoriaService.save(categoria);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('EMPLEADO', 'ADMINISTRADOR')")
     public ResponseEntity<CategoriaResponseDto> actualizarCategoria(@PathVariable Long id, @Valid @RequestBody CategoriaRequestDto categoria) {
         Optional<CategoriaResponseDto> categoriaExistente = categoriaService.findById(id);
         if (categoriaExistente.isPresent()) {
@@ -45,6 +49,7 @@ public class CategoriaController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('EMPLEADO', 'ADMINISTRADOR')")
     public ResponseEntity<Void> eliminarCategoria(@PathVariable Long id) {
         if (categoriaService.findById(id).isPresent()) {
             categoriaService.deleteById(id);

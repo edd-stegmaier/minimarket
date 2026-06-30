@@ -5,6 +5,7 @@ import com.minimarket.dto.VentaResponseDto;
 import jakarta.validation.Valid;
 import com.minimarket.service.VentaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/ventas")
+@PreAuthorize("hasAnyAuthority('CLIENTE', 'EMPLEADO', 'ADMINISTRADOR')")
 public class VentaController {
 
     @Autowired
@@ -30,6 +32,7 @@ public class VentaController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('EMPLEADO')")
     public VentaResponseDto guardarVenta(@Valid @RequestBody VentaRequestDto venta) {
         return ventaService.save(venta);
     }

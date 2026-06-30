@@ -17,13 +17,13 @@ public class SecurityDataInitializer {
     @Bean
     public CommandLineRunner seedSecurityData(RolRepository rolRepository, UsuarioService usuarioService) {
         return args -> {
-            Rol cliente = ensureRole(rolRepository, "ROL_CLIENTE");
-            Rol empleado = ensureRole(rolRepository, "ROL_EMPLEADO");
-            Rol gerente = ensureRole(rolRepository, "ROL_GERENTE");
+            Rol cliente = ensureRole(rolRepository, "CLIENTE");
+            Rol empleado = ensureRole(rolRepository, "EMPLEADO");
+            Rol administrador = ensureRole(rolRepository, "ADMINISTRADOR");
 
             ensureUser(usuarioService, "cliente", "Cliente123!", cliente);
             ensureUser(usuarioService, "empleado", "Empleado123!", empleado);
-            ensureUser(usuarioService, "gerente", "Gerente123!", gerente);
+            ensureUser(usuarioService, "administrador", "administrador123!", administrador);
         };
     }
 

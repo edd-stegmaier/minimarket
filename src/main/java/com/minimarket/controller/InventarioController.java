@@ -5,6 +5,7 @@ import com.minimarket.dto.InventarioResponseDto;
 import jakarta.validation.Valid;
 import com.minimarket.service.InventarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/inventario")
+@PreAuthorize("hasAnyAuthority('EMPLEADO', 'ADMINISTRADOR')")
 public class InventarioController {
 
     @Autowired

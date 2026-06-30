@@ -1,6 +1,7 @@
 package com.minimarket.entity;
 
 import jakarta.persistence.*;
+
 import java.util.Set;
 
 @Entity
@@ -15,27 +16,22 @@ public class Rol {
     @ManyToMany(mappedBy = "roles")
     private Set<Usuario> usuarios;
 
-    // Getters y Setters
+    // Getters and Setters
     public Long getId() {
         return id;
     }
-
     public void setId(Long id) {
         this.id = id;
     }
-
     public String getNombre() {
         return nombre;
     }
-
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-
     public Set<Usuario> getUsuarios() {
         return usuarios;
     }
-
     public void setUsuarios(Set<Usuario> usuarios) {
         this.usuarios = usuarios;
     }
