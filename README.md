@@ -1,44 +1,37 @@
-<<<<<<< HEAD
-# Minimarket — Resumen rápido
-
-Proyecto backend para una tienda mínima (Minimarket) desarrollado con Java y Spring Boot.
-=======
 # Minimarket
 
 Proyecto backend para una tienda Minimarket desarrollado con Java y Spring Boot.
->>>>>>> cd65d4709be2fcf4e84681a833e2c4a344147e31
 
-Características principales:
+## Características principales
+
 - API REST con controladores para Productos, Categorías, Inventario, Carrito, Usuarios y Ventas.
 - Capas bien separadas: `controller`, `service`, `repository`, `dto`, `entity`.
 - Manejo de excepciones y respuestas mediante DTOs (`Request/Response`).
 - Seguridad básica con filtros/utilidades (implementación JWT disponible en `security`).
 - Persistencia con JPA (repositorios) y configuración en `src/main/resources/application.properties`.
 
-<<<<<<< HEAD
-Estructura relevante:
-- Código: `src/main/java/com/minimarket/` (controladores, servicios, repositorios, entidades, seguridad, DTOs).
-- Recursos: `src/main/resources/` (configuración, plantillas estáticas).
+## Estructura del proyecto
 
-=======
->>>>>>> cd65d4709be2fcf4e84681a833e2c4a344147e31
-Cómo ejecutar (desde la raíz del proyecto):
+- **Código**: `src/main/java/com/minimarket/` (controladores, servicios, repositorios, entidades, seguridad, DTOs).
+- **Recursos**: `src/main/resources/` (configuración, plantillas estáticas).
+
+## Cómo ejecutar
+
+Desde la raíz del proyecto:
 
 ```bash
 mvn spring-boot:run
-# o
+```
+
+O compilar y ejecutar el JAR:
+
+```bash
 mvn package
 java -jar target/minimarket-0.0.1-SNAPSHOT.jar
 ```
 
-Ejecutar pruebas:
+## Ejecutar pruebas
 
 ```bash
 mvn test
 ```
-<<<<<<< HEAD
-
-Contacto y siguientes pasos:
-- Este README es un resumen corto para GitHub. Puedo añadir instrucciones de despliegue, ejemplo de requests (Postman/Insomnia) o traducción al inglés si lo deseas.
-=======
->>>>>>> cd65d4709be2fcf4e84681a833e2c4a344147e31
