@@ -1,6 +1,7 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.controller.assembler.ProductoModelAssembler;
 import com.minimarket.dto.CategoriaResponseDto;
 import com.minimarket.dto.ProductoRequestDto;
 import com.minimarket.dto.ProductoResponseDto;
@@ -29,12 +30,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProductoController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class, ProductoModelAssembler.class})
 class ProductoControllerTest {
 
     @Autowired
@@ -129,7 +132,9 @@ class ProductoControllerTest {
         doNothing().when(productoService).deleteById(2L);
 
         mockMvc.perform(delete("/api/productos/2"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensaje").value("Producto eliminado exitosamente"))
+                .andExpect(jsonPath("$._links.productos.href").exists());
 
         verify(productoService).findById(2L);
         verify(productoService).deleteById(2L);
@@ -156,8 +161,51 @@ class ProductoControllerTest {
 
         mockMvc.perform(get("/api/productos/2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("Arroz"));
+                .andExpect(jsonPath("$.nombre").value("Arroz"))
+                .andExpect(jsonPath("$._links.self.href").exists())
+                .andExpect(jsonPath("$._links.productos.href").exists());
 
         verify(productoService).findById(2L);
+    }
+
+    @Test
+    @WithMockUser(authorities = "CLIENTE")
+    void testListarProductosRetornaColeccionConLinks() throws Exception {
+        when(productoService.findAll()).thenReturn(java.util.List.of(
+                new ProductoResponseDto(2L, "Arroz", 1500.0, 20, new CategoriaResponseDto(1L, "Abarrotes"))
+        ));
+
+        mockMvc.perform(get("/api/productos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.productoResponseDtoList[0].nombre").value("Arroz"))
+                .andExpect(jsonPath("$._embedded.productoResponseDtoList[0]._links.self.href").exists())
+                .andExpect(jsonPath("$._links.self.href").exists());
+
+        verify(productoService).findAll();
+    }
+
+    @Test
+    @WithMockUser(authorities = "ADMINISTRADOR")
+    void testGuardarProductoRetornaCreatedConLinks() throws Exception {
+        ProductoRequestDto request = new ProductoRequestDto(2L, "Arroz integral", 1800.0, 15, 1L);
+        ProductoResponseDto response = new ProductoResponseDto(
+                2L,
+                "Arroz integral",
+                1800.0,
+                15,
+                new CategoriaResponseDto(1L, "Abarrotes")
+        );
+
+        when(productoService.save(any(ProductoRequestDto.class))).thenReturn(response);
+
+        mockMvc.perform(post("/api/productos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "http://localhost/api/productos/2"))
+                .andExpect(jsonPath("$.nombre").value("Arroz integral"))
+                .andExpect(jsonPath("$._links.self.href").exists());
+
+        verify(productoService).save(any(ProductoRequestDto.class));
     }
 }

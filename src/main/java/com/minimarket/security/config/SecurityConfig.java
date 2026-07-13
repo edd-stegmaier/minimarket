@@ -71,6 +71,11 @@ public class SecurityConfig {
                             .hasAnyAuthority("EMPLEADO", "ADMINISTRADOR")
                         .requestMatchers("/api/usuarios/**")
                             .hasAuthority("ADMINISTRADOR")
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                            ).permitAll() // Permitir acceso a la documentación de Swagger
                         .anyRequest().authenticated()
                 )
                     .httpBasic(httpBasic -> httpBasic.disable())

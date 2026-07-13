@@ -1,6 +1,7 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.controller.assembler.CarritoModelAssembler;
 import com.minimarket.dto.CarritoRequestDto;
 import com.minimarket.dto.CarritoResponseDto;
 import com.minimarket.dto.CategoriaResponseDto;
@@ -38,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CarritoController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class, CarritoModelAssembler.class})
 class CarritoControllerTest {
 
     @Autowired
@@ -70,8 +71,9 @@ class CarritoControllerTest {
 
         mockMvc.perform(get("/api/carrito"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].usuario.username").value("cliente"))
-                .andExpect(jsonPath("$[0].producto.nombre").value("Arroz"));
+                .andExpect(jsonPath("$._embedded.carritoResponseDtoList[0].usuario.username").value("cliente"))
+                .andExpect(jsonPath("$._embedded.carritoResponseDtoList[0].producto.nombre").value("Arroz"))
+                .andExpect(jsonPath("$._embedded.carritoResponseDtoList[0]._links.self.href").exists());
 
         verify(carritoService).findAll();
     }
@@ -90,7 +92,8 @@ class CarritoControllerTest {
 
         mockMvc.perform(get("/api/carrito/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.cantidad").value(2));
+                .andExpect(jsonPath("$.cantidad").value(2))
+                .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(carritoService).findById(1L);
     }
@@ -113,7 +116,8 @@ class CarritoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.cantidad").value(3));
+                .andExpect(jsonPath("$.cantidad").value(3))
+                .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(carritoService).findById(1L);
         verify(carritoService).save(any(CarritoRequestDto.class));
@@ -149,7 +153,9 @@ class CarritoControllerTest {
         doNothing().when(carritoService).deleteById(1L);
 
         mockMvc.perform(delete("/api/carrito/1"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensaje").value("Producto eliminado del carrito exitosamente"))
+                .andExpect(jsonPath("$._links.carrito.href").exists());
 
         verify(carritoService).findById(1L);
         verify(carritoService).deleteById(1L);

@@ -1,6 +1,7 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.controller.assembler.InventarioModelAssembler;
 import com.minimarket.dto.CategoriaResponseDto;
 import com.minimarket.dto.InventarioRequestDto;
 import com.minimarket.dto.InventarioResponseDto;
@@ -33,11 +34,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(InventarioController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class, InventarioModelAssembler.class})
 class InventarioControllerTest {
 
     @Autowired
@@ -72,9 +74,11 @@ class InventarioControllerTest {
         mockMvc.perform(post("/api/inventario")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+            .andExpect(status().isCreated())
+            .andExpect(header().string("Location", "http://localhost/api/inventario/1"))
                 .andExpect(jsonPath("$.tipoMovimiento").value("ENTRADA"))
-                .andExpect(jsonPath("$.cantidad").value(10));
+            .andExpect(jsonPath("$.cantidad").value(10))
+            .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(inventarioService).save(any(InventarioRequestDto.class));
     }
@@ -96,9 +100,11 @@ class InventarioControllerTest {
         mockMvc.perform(post("/api/inventario")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+            .andExpect(status().isCreated())
+            .andExpect(header().string("Location", "http://localhost/api/inventario/2"))
                 .andExpect(jsonPath("$.tipoMovimiento").value("SALIDA"))
-                .andExpect(jsonPath("$.cantidad").value(4));
+            .andExpect(jsonPath("$.cantidad").value(4))
+            .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(inventarioService).save(any(InventarioRequestDto.class));
     }
@@ -135,7 +141,8 @@ class InventarioControllerTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(request)))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.tipoMovimiento").value("SALIDA"));
+        .andExpect(jsonPath("$.tipoMovimiento").value("SALIDA"))
+        .andExpect(jsonPath("$._links.self.href").exists());
 
     verify(inventarioService).findById(2L);
     verify(inventarioService).save(any(InventarioRequestDto.class));
@@ -172,7 +179,9 @@ class InventarioControllerTest {
     doNothing().when(inventarioService).deleteById(2L);
 
     mockMvc.perform(delete("/api/inventario/2"))
-        .andExpect(status().isNoContent());
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.mensaje").value("Movimiento de inventario eliminado exitosamente"))
+        .andExpect(jsonPath("$._links.inventario.href").exists());
 
     verify(inventarioService).findById(2L);
     verify(inventarioService).deleteById(2L);
@@ -205,7 +214,8 @@ class InventarioControllerTest {
 
     mockMvc.perform(get("/api/inventario/2"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$.tipoMovimiento").value("SALIDA"));
+        .andExpect(jsonPath("$.tipoMovimiento").value("SALIDA"))
+        .andExpect(jsonPath("$._links.self.href").exists());
 
     verify(inventarioService).findById(2L);
     }

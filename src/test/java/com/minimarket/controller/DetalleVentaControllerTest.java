@@ -1,6 +1,7 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.controller.assembler.DetalleVentaModelAssembler;
 import com.minimarket.dto.CategoriaResponseDto;
 import com.minimarket.dto.DetalleVentaRequestDto;
 import com.minimarket.dto.DetalleVentaResponseDto;
@@ -33,11 +34,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(DetalleVentaController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class, DetalleVentaModelAssembler.class})
 class DetalleVentaControllerTest {
 
     @Autowired
@@ -69,7 +71,8 @@ class DetalleVentaControllerTest {
 
         mockMvc.perform(get("/api/detalle-ventas"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].producto.nombre").value("Arroz"));
+                .andExpect(jsonPath("$._embedded.detalleVentaResponseDtoList[0].producto.nombre").value("Arroz"))
+                .andExpect(jsonPath("$._embedded.detalleVentaResponseDtoList[0]._links.self.href").exists());
 
         verify(detalleVentaService).findAll();
     }
@@ -97,7 +100,8 @@ class DetalleVentaControllerTest {
 
         mockMvc.perform(get("/api/detalle-ventas/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.cantidad").value(2));
+                .andExpect(jsonPath("$.cantidad").value(2))
+                .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(detalleVentaService).findById(1L);
     }
@@ -118,8 +122,10 @@ class DetalleVentaControllerTest {
         mockMvc.perform(post("/api/detalle-ventas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.precio").value(1500.0));
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "http://localhost/api/detalle-ventas/1"))
+                .andExpect(jsonPath("$.precio").value(1500.0))
+                .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(detalleVentaService).save(any(DetalleVentaRequestDto.class));
     }
@@ -154,7 +160,9 @@ class DetalleVentaControllerTest {
         doNothing().when(detalleVentaService).deleteById(1L);
 
         mockMvc.perform(delete("/api/detalle-ventas/1"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.mensaje").value("Detalle de venta eliminado exitosamente"))
+                .andExpect(jsonPath("$._links.detalleVentas.href").exists());
 
         verify(detalleVentaService).findById(1L);
         verify(detalleVentaService).deleteById(1L);

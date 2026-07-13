@@ -1,6 +1,7 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.controller.assembler.VentaModelAssembler;
 import com.minimarket.dto.CategoriaResponseDto;
 import com.minimarket.dto.DetalleVentaRequestDto;
 import com.minimarket.dto.DetalleVentaResponseDto;
@@ -35,11 +36,12 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(VentaController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class, VentaModelAssembler.class})
 class VentaControllerTest {
 
     @Autowired
@@ -83,10 +85,12 @@ class VentaControllerTest {
         mockMvc.perform(post("/api/ventas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "http://localhost/api/ventas/1"))
                 .andExpect(jsonPath("$.usuario.username").value("cajero"))
                 .andExpect(jsonPath("$.detalles[0].producto.nombre").value("Arroz"))
-                .andExpect(jsonPath("$.detalles[0].cantidad").value(2));
+                .andExpect(jsonPath("$.detalles[0].cantidad").value(2))
+                .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(ventaService).save(any(VentaRequestDto.class));
     }
@@ -141,7 +145,8 @@ class VentaControllerTest {
 
         mockMvc.perform(get("/api/ventas"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].usuario.username").value("cajero"));
+                .andExpect(jsonPath("$._embedded.ventaResponseDtoList[0].usuario.username").value("cajero"))
+                .andExpect(jsonPath("$._embedded.ventaResponseDtoList[0]._links.self.href").exists());
 
         verify(ventaService).findAll();
     }
@@ -165,7 +170,8 @@ class VentaControllerTest {
 
         mockMvc.perform(get("/api/ventas/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.detalles[0].producto.nombre").value("Arroz"));
+                .andExpect(jsonPath("$.detalles[0].producto.nombre").value("Arroz"))
+                .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(ventaService).findById(1L);
     }

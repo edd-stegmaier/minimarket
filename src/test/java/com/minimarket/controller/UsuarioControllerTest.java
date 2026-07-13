@@ -1,6 +1,7 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.controller.assembler.UsuarioModelAssembler;
 import com.minimarket.dto.RolResponseDto;
 import com.minimarket.dto.UsuarioResponseDto;
 import com.minimarket.exception.GlobalExceptionHandler;
@@ -34,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UsuarioController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class, UsuarioModelAssembler.class})
 class UsuarioControllerTest {
 
     @Autowired
@@ -61,8 +62,9 @@ class UsuarioControllerTest {
 
         mockMvc.perform(get("/api/usuarios"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].username").value("administrador"))
-                .andExpect(jsonPath("$[0].roles[0].nombre").value("ADMINISTRADOR"));
+            .andExpect(jsonPath("$._embedded.usuarioResponseDtoList[0].username").value("administrador"))
+            .andExpect(jsonPath("$._embedded.usuarioResponseDtoList[0].roles[0].nombre").value("ADMINISTRADOR"))
+            .andExpect(jsonPath("$._embedded.usuarioResponseDtoList[0]._links.self.href").exists());
 
         verify(usuarioService).findAll();
     }
@@ -103,7 +105,8 @@ class UsuarioControllerTest {
                     Set.of(1L)
                 ))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.username").value("admin-actualizado"));
+            .andExpect(jsonPath("$.username").value("admin-actualizado"))
+            .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(usuarioService).findById(1L);
         verify(usuarioService).save(any());
@@ -137,7 +140,9 @@ class UsuarioControllerTest {
         doNothing().when(usuarioService).deleteById(1L);
 
         mockMvc.perform(delete("/api/usuarios/1"))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.mensaje").value("Usuario eliminado exitosamente"))
+            .andExpect(jsonPath("$._links.usuarios.href").exists());
 
         verify(usuarioService).findById(1L);
         verify(usuarioService).deleteById(1L);
@@ -164,7 +169,8 @@ class UsuarioControllerTest {
 
         mockMvc.perform(get("/api/usuarios/1"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.username").value("administrador"));
+            .andExpect(jsonPath("$.username").value("administrador"))
+            .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(usuarioService).findById(1L);
         }

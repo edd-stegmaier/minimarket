@@ -1,6 +1,7 @@
 package com.minimarket.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.controller.assembler.CategoriaModelAssembler;
 import com.minimarket.dto.CategoriaRequestDto;
 import com.minimarket.dto.CategoriaResponseDto;
 import com.minimarket.exception.GlobalExceptionHandler;
@@ -34,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CategoriaController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class})
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, GlobalExceptionHandler.class, CategoriaModelAssembler.class})
 class CategoriaControllerTest {
 
     @Autowired
@@ -59,7 +60,9 @@ class CategoriaControllerTest {
 
         mockMvc.perform(get("/api/categorias"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nombre").value("Abarrotes"));
+            .andExpect(jsonPath("$._embedded.categoriaResponseDtoList[0].nombre").value("Abarrotes"))
+            .andExpect(jsonPath("$._embedded.categoriaResponseDtoList[0]._links.self.href").exists())
+            .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(categoriaService).findAll();
     }
@@ -71,7 +74,8 @@ class CategoriaControllerTest {
 
         mockMvc.perform(get("/api/categorias/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("Abarrotes"));
+            .andExpect(jsonPath("$.nombre").value("Abarrotes"))
+            .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(categoriaService).findById(1L);
     }
@@ -88,7 +92,8 @@ class CategoriaControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nombre").value("Limpieza"));
+            .andExpect(jsonPath("$.nombre").value("Limpieza"))
+            .andExpect(jsonPath("$._links.self.href").exists());
 
         verify(categoriaService).findById(1L);
         verify(categoriaService).save(any(CategoriaRequestDto.class));
@@ -130,7 +135,9 @@ class CategoriaControllerTest {
         doNothing().when(categoriaService).deleteById(1L);
 
         mockMvc.perform(delete("/api/categorias/1"))
-                .andExpect(status().isNoContent());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.mensaje").value("Categoria eliminada exitosamente"))
+            .andExpect(jsonPath("$._links.categorias.href").exists());
 
         verify(categoriaService).findById(1L);
         verify(categoriaService).deleteById(1L);
