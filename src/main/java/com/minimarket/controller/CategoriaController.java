@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -102,18 +101,15 @@ public class CategoriaController {
     @PreAuthorize("hasAnyAuthority('EMPLEADO', 'ADMINISTRADOR')")
     @Operation(summary = "Eliminar categoria", description = "Elimina una categoria especifica utilizando su ID.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Categoria eliminada exitosamente"),
+        @ApiResponse(responseCode = "204", description = "Categoria eliminada exitosamente"),
         @ApiResponse(responseCode = "404", description = "Categoria no encontrada"),
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    public ResponseEntity<EntityModel<Map<String, String>>> eliminarCategoria(
+    public ResponseEntity<Void> eliminarCategoria(
             @Parameter(description = "ID de la categoria a eliminar", example = "1") @PathVariable Long id) {
         if (categoriaService.findById(id).isPresent()) {
             categoriaService.deleteById(id);
-            return ResponseEntity.ok(EntityModel.of(
-                    Map.of("mensaje", "Categoria eliminada exitosamente"),
-                    linkTo(methodOn(CategoriaController.class).listarCategorias()).withRel("categorias")
-            ));
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }

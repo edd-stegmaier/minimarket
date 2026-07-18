@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -109,15 +108,11 @@ public class ProductoController {
         @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    public ResponseEntity<EntityModel<Map<String, String>>> eliminarProducto(
+    public ResponseEntity<Void> eliminarProducto(
             @Parameter(description = "ID del producto a eliminar", example = "1") @PathVariable Long id) {
         if (productoService.findById(id).isPresent()) {
             productoService.deleteById(id);
-            EntityModel<Map<String, String>> response = EntityModel.of(
-                    Map.of("mensaje", "Producto eliminado exitosamente"),
-                    linkTo(methodOn(ProductoController.class).listarProductos()).withRel("productos")
-            );
-            return ResponseEntity.ok(response);
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }

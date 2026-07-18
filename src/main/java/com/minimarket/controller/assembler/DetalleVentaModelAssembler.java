@@ -1,6 +1,7 @@
 package com.minimarket.controller.assembler;
 
 import com.minimarket.controller.DetalleVentaController;
+import com.minimarket.controller.ProductoController;
 import com.minimarket.dto.DetalleVentaResponseDto;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -17,12 +18,19 @@ public class DetalleVentaModelAssembler implements RepresentationModelAssembler<
 
     @Override
     public EntityModel<DetalleVentaResponseDto> toModel(DetalleVentaResponseDto detalleVenta) {
-        return EntityModel.of(detalleVenta,
+        EntityModel<DetalleVentaResponseDto> model = EntityModel.of(detalleVenta,
                 linkTo(methodOn(DetalleVentaController.class).obtenerDetalleVentaPorId(detalleVenta.getId())).withSelfRel(),
                 linkTo(methodOn(DetalleVentaController.class).listarDetalleVentas()).withRel("detalleVentas"),
                 linkTo(methodOn(DetalleVentaController.class).actualizarDetalleVenta(detalleVenta.getId(), null)).withRel("actualizar"),
                 linkTo(methodOn(DetalleVentaController.class).eliminarDetalleVenta(detalleVenta.getId())).withRel("eliminar")
         );
+
+        if (detalleVenta.getProducto() != null && detalleVenta.getProducto().getId() != null) {
+            model.add(linkTo(methodOn(ProductoController.class)
+                    .obtenerProductoPorId(detalleVenta.getProducto().getId())).withRel("producto"));
+        }
+
+        return model;
     }
 
     public CollectionModel<EntityModel<DetalleVentaResponseDto>> toCollectionModel(List<DetalleVentaResponseDto> detalleVentas) {

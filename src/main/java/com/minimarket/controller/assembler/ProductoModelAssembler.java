@@ -1,5 +1,6 @@
 package com.minimarket.controller.assembler;
 
+import com.minimarket.controller.CategoriaController;
 import com.minimarket.controller.ProductoController;
 import com.minimarket.dto.ProductoResponseDto;
 import org.springframework.hateoas.CollectionModel;
@@ -17,12 +18,19 @@ public class ProductoModelAssembler implements RepresentationModelAssembler<Prod
 
     @Override
     public EntityModel<ProductoResponseDto> toModel(ProductoResponseDto producto) {
-        return EntityModel.of(producto,
+        EntityModel<ProductoResponseDto> model = EntityModel.of(producto,
                 linkTo(methodOn(ProductoController.class).obtenerProductoPorId(producto.getId())).withSelfRel(),
                 linkTo(methodOn(ProductoController.class).listarProductos()).withRel("productos"),
                 linkTo(methodOn(ProductoController.class).actualizarProducto(producto.getId(), null)).withRel("actualizar"),
                 linkTo(methodOn(ProductoController.class).eliminarProducto(producto.getId())).withRel("eliminar")
         );
+
+        if (producto.getCategoria() != null && producto.getCategoria().getId() != null) {
+            model.add(linkTo(methodOn(CategoriaController.class)
+                    .obtenerCategoriaPorId(producto.getCategoria().getId())).withRel("categoria"));
+        }
+
+        return model;
     }
 
     public CollectionModel<EntityModel<ProductoResponseDto>> toCollectionModel(List<ProductoResponseDto> productos) {

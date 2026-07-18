@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UsuarioController.class)
@@ -140,9 +141,8 @@ class UsuarioControllerTest {
         doNothing().when(usuarioService).deleteById(1L);
 
         mockMvc.perform(delete("/api/usuarios/1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.mensaje").value("Usuario eliminado exitosamente"))
-            .andExpect(jsonPath("$._links.usuarios.href").exists());
+            .andExpect(status().isNoContent())
+            .andExpect(content().string(""));
 
         verify(usuarioService).findById(1L);
         verify(usuarioService).deleteById(1L);

@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -99,19 +98,16 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar usuario", description = "Elimina un usuario especifico utilizando su ID.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Usuario eliminado exitosamente"),
+        @ApiResponse(responseCode = "204", description = "Usuario eliminado exitosamente"),
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    public ResponseEntity<EntityModel<Map<String, String>>> eliminarUsuario(
+    public ResponseEntity<Void> eliminarUsuario(
             @Parameter(description = "ID del usuario a eliminar", example = "1") @PathVariable Long id) {
         Optional<UsuarioResponseDto> usuario = usuarioService.findById(id);
         if (usuario.isPresent()) {
             usuarioService.deleteById(id);
-            return ResponseEntity.ok(EntityModel.of(
-                    Map.of("mensaje", "Usuario eliminado exitosamente"),
-                    linkTo(methodOn(UsuarioController.class).listarUsuarios()).withRel("usuarios")
-            ));
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }

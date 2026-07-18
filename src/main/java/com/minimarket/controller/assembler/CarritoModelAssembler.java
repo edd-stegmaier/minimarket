@@ -1,6 +1,8 @@
 package com.minimarket.controller.assembler;
 
 import com.minimarket.controller.CarritoController;
+import com.minimarket.controller.ProductoController;
+import com.minimarket.controller.UsuarioController;
 import com.minimarket.dto.CarritoResponseDto;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
@@ -17,12 +19,24 @@ public class CarritoModelAssembler implements RepresentationModelAssembler<Carri
 
     @Override
     public EntityModel<CarritoResponseDto> toModel(CarritoResponseDto carrito) {
-        return EntityModel.of(carrito,
+        EntityModel<CarritoResponseDto> model = EntityModel.of(carrito,
                 linkTo(methodOn(CarritoController.class).obtenerCarritoPorId(carrito.getId())).withSelfRel(),
                 linkTo(methodOn(CarritoController.class).listarCarrito()).withRel("carrito"),
                 linkTo(methodOn(CarritoController.class).actualizarCarrito(carrito.getId(), null)).withRel("actualizar"),
                 linkTo(methodOn(CarritoController.class).eliminarProductoDelCarrito(carrito.getId())).withRel("eliminar")
         );
+
+        if (carrito.getUsuario() != null && carrito.getUsuario().getId() != null) {
+            model.add(linkTo(methodOn(UsuarioController.class)
+                    .obtenerUsuarioPorId(carrito.getUsuario().getId())).withRel("usuario"));
+        }
+
+        if (carrito.getProducto() != null && carrito.getProducto().getId() != null) {
+            model.add(linkTo(methodOn(ProductoController.class)
+                    .obtenerProductoPorId(carrito.getProducto().getId())).withRel("producto"));
+        }
+
+        return model;
     }
 
     public CollectionModel<EntityModel<CarritoResponseDto>> toCollectionModel(List<CarritoResponseDto> carritos) {

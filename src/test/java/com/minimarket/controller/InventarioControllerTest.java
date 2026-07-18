@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -179,9 +180,8 @@ class InventarioControllerTest {
     doNothing().when(inventarioService).deleteById(2L);
 
     mockMvc.perform(delete("/api/inventario/2"))
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.mensaje").value("Movimiento de inventario eliminado exitosamente"))
-        .andExpect(jsonPath("$._links.inventario.href").exists());
+        .andExpect(status().isNoContent())
+        .andExpect(content().string(""));
 
     verify(inventarioService).findById(2L);
     verify(inventarioService).deleteById(2L);

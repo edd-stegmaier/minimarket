@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -132,9 +133,8 @@ class ProductoControllerTest {
         doNothing().when(productoService).deleteById(2L);
 
         mockMvc.perform(delete("/api/productos/2"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.mensaje").value("Producto eliminado exitosamente"))
-                .andExpect(jsonPath("$._links.productos.href").exists());
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
 
         verify(productoService).findById(2L);
         verify(productoService).deleteById(2L);

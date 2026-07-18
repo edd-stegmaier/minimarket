@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CategoriaController.class)
@@ -135,9 +136,8 @@ class CategoriaControllerTest {
         doNothing().when(categoriaService).deleteById(1L);
 
         mockMvc.perform(delete("/api/categorias/1"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.mensaje").value("Categoria eliminada exitosamente"))
-            .andExpect(jsonPath("$._links.categorias.href").exists());
+            .andExpect(status().isNoContent())
+            .andExpect(content().string(""));
 
         verify(categoriaService).findById(1L);
         verify(categoriaService).deleteById(1L);

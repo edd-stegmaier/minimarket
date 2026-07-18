@@ -36,6 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CarritoController.class)
@@ -153,9 +154,8 @@ class CarritoControllerTest {
         doNothing().when(carritoService).deleteById(1L);
 
         mockMvc.perform(delete("/api/carrito/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.mensaje").value("Producto eliminado del carrito exitosamente"))
-                .andExpect(jsonPath("$._links.carrito.href").exists());
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
 
         verify(carritoService).findById(1L);
         verify(carritoService).deleteById(1L);

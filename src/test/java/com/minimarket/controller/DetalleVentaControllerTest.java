@@ -34,6 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -160,9 +161,8 @@ class DetalleVentaControllerTest {
         doNothing().when(detalleVentaService).deleteById(1L);
 
         mockMvc.perform(delete("/api/detalle-ventas/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.mensaje").value("Detalle de venta eliminado exitosamente"))
-                .andExpect(jsonPath("$._links.detalleVentas.href").exists());
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
 
         verify(detalleVentaService).findById(1L);
         verify(detalleVentaService).deleteById(1L);

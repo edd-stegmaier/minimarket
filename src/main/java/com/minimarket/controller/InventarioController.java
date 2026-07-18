@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -99,18 +98,15 @@ public class InventarioController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar movimiento", description = "Elimina un movimiento de inventario especifico utilizando su ID.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Movimiento de inventario eliminado exitosamente"),
+        @ApiResponse(responseCode = "204", description = "Movimiento de inventario eliminado exitosamente"),
         @ApiResponse(responseCode = "404", description = "Movimiento de inventario no encontrado"),
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    public ResponseEntity<EntityModel<Map<String, String>>> eliminarMovimiento(
+    public ResponseEntity<Void> eliminarMovimiento(
             @Parameter(description = "ID del movimiento a eliminar", example = "1") @PathVariable Long id) {
         if (inventarioService.findById(id).isPresent()) {
             inventarioService.deleteById(id);
-            return ResponseEntity.ok(EntityModel.of(
-                    Map.of("mensaje", "Movimiento de inventario eliminado exitosamente"),
-                    linkTo(methodOn(InventarioController.class).listarMovimientosDeInventario()).withRel("inventario")
-            ));
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }

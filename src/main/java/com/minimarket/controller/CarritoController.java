@@ -20,7 +20,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -101,19 +100,16 @@ public class CarritoController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar producto del carrito", description = "Elimina un producto específico del carrito de compras utilizando su ID.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Producto eliminado del carrito exitosamente"),
+        @ApiResponse(responseCode = "204", description = "Producto eliminado del carrito exitosamente"),
         @ApiResponse(responseCode = "404", description = "Producto no encontrado en el carrito"),
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
-    public ResponseEntity<EntityModel<Map<String, String>>> eliminarProductoDelCarrito(
+    public ResponseEntity<Void> eliminarProductoDelCarrito(
             @Parameter(description = "ID del Carrito a Eliminar", example = "1") @PathVariable Long id) {
 
         if (carritoService.findById(id).isPresent()) {
             carritoService.deleteById(id);
-            return ResponseEntity.ok(EntityModel.of(
-                    Map.of("mensaje", "Producto eliminado del carrito exitosamente"),
-                    linkTo(methodOn(CarritoController.class).listarCarrito()).withRel("carrito")
-            ));
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }

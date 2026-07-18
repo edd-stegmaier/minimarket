@@ -1,6 +1,7 @@
 package com.minimarket.security.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minimarket.exception.ApiErrorResponse;
 import com.minimarket.security.filter.JwtAuthenticationFilter;
 import com.minimarket.security.service.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,8 +26,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Configuration
 @EnableMethodSecurity
@@ -119,12 +118,14 @@ public class SecurityConfig {
         response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", Instant.now());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
-        body.put("path", request.getRequestURI());
+        ApiErrorResponse body = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                request.getRequestURI(),
+                null
+        );
 
         objectMapper.writeValue(response.getOutputStream(), body);
     }
