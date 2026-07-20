@@ -185,7 +185,3 @@ Resultado validado en el proyecto:
 - 0 errors
 - 0 skipped
 
-## Notas
-
-- La documentación académica y de evaluación está en la carpeta `docs/`.
-- El informe EFT resume el estado final de seguridad, pruebas y documentación de la API.
